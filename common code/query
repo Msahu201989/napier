@@ -1,0 +1,57 @@
+Modify below python code to check LB's first 2 IP Address & update table - "from boto3.dynamodb.conditions import Key
+def send_html_email(loadBalancer, oldIPAddress, newIPAddress):
+ ses_client = boto3.client("ses", region_name="us-east-1")
+CHARSET = "UTF-8"
+HTML_EMAIL_CONTENT = f"""
+<h1 style='text-align:center'>This is Test Email Please Ignore-IP Address for {loadBalancer} changed from {oldIPAddress} to {newIPAddress}</h1>
+ </body>
+ </html>
+ """
+ response = ses_client.send_email(
+ Destination={
+"ToAddresses": [
+"mukesh.sahu@napierparkglobal.com",
+ ],
+ },
+ Message={
+  "Body": {
+ "Html": {
+ "Charset": CHARSET,
+ "Data": HTML_EMAIL_CONTENT,
+ }
+ },
+"Subject": {
+"Charset": CHARSET,
+"Data": "IP Changed",
+ },
+},
+ Source="AppsLBIPChangeNotifyList@napierparkglobal.com",
+)
+ return
+def lambda_handler(event, context):
+alb_list = os.environ['ALBLIST'].split(",")
+for item in alb_list:
+ alb_entry = ((item.replace("[","")).replace("]","")).replace("'","")
+ addr1 = socket.gethostbyname_ex(alb_entry)
+ dynamodb = boto3.resource('dynamodb', region_name="us-east-1")
+ table = dynamodb.Table('ALBIPStatus')
+ response = table.query(KeyConditionExpression=Key('alb_id').eq(alb_entry))
+ ip_json = json.dumps(response['Items'])
+ip_dict = json.loads(ip_json)
+ storedIPs = list(ip_dict[0].values())
+del storedIPs[0]
+newIPIndexes = [ip for ip in storedIPs if "exists" not in ip]
+ dictkeys = list(ip_dict[0].keys())
+ keysForUpdates = [key for index in newIPIndexes for key in dictkeys if ip_dict[0][key] == index]
+ ipforUpdates = [ip for ip in addr1[2] if ip not in storedIPs]
+ for counter in range(min(len(keysForUpdates), len(ipforUpdates))):
+ response = table.update_item(
+ Key={"alb_id": alb_entry},
+ UpdateExpression="set " + keysForUpdates[counter] + " = :newIP",
+ExpressionAttributeValues={":newIP": ipforUpdates[counter]}
+ )
+ send_html_email(alb_entry, ip_dict[0][keysForUpdates[counter]], ipforUpdates[counter])
+ return {
+'statusCode': 200,
+ 'body': 'IP updates and notifications sent successfully.'
+ }"

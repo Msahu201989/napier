@@ -1,0 +1,25 @@
+{
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "L:\\Logs\\IVPEDM\\EDMWindowsService\\*",
+            "log_group_name": "/edmwindowsservice",
+            "log_stream_name": "{instance_id}"
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+            "file_path": "L:\\Treasury\\Logs\\*",
+            "log_group_name": "/treasury",
+            "log_stream_name": "{instance_id}"
+          },
+          {
+            "file_path": "L:\\KarmaLogs\\WebApp\\*",
+            "log_group_name": "/karma",
+            "log_stream_name": "{instance_id}"
