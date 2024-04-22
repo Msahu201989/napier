@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "awswithlinux" {
-  #  provider = aws.cross_account
+  provider = aws.cross_account
   bucket   = "napiercrossaccount39"
 
   tags = {
