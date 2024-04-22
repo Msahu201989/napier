@@ -1,6 +1,9 @@
+provider "aws" {
+  region = "us-east-1"  # Replace this with your desired AWS region
+}
+
 resource "aws_s3_bucket" "awswithlinux99" {
-  #  provider = aws.cross_account
-  bucket   = "napiercrossaccount39"
+  bucket = "napiercrossaccount39"
 
   tags = {
     "Application" = "Geneva_Dev"
@@ -9,4 +12,3 @@ resource "aws_s3_bucket" "awswithlinux99" {
     "Module"      = "Geneva"
   }
 }
-
